@@ -1,6 +1,7 @@
 import { Response, Request } from 'express';
 import { Companys, TAG_COMPANYS } from '../models/companys.model';
 import { FirestoreDB } from '../db/firestore.db';
+import { ResponseDTO } from '../models/base.model';
 
 export class CompanysController {
 
@@ -10,28 +11,32 @@ export class CompanysController {
         this.db = FirestoreDB.getInstance();
     }
 
-    public create = (req: Request, res: Response) => {
-        const company :Companys = {
-            company: req.body.company,
-            address: req.body.address,
-            date: req.body.date,
-            employment: req.body.employment
+    public create = async (req: Request, res: Response) => {
+        let response:ResponseDTO = new ResponseDTO();
+        try {
+            const company :Companys = {
+                company: req.body.company,
+                address: req.body.address,
+                date: req.body.date,
+                employment: req.body.employment
+            }
+            let idCreated:string = await  this.db.create( TAG_COMPANYS, company);
+            res.status(201).json(response.init())
+
+        } catch (error) {
+            
         }
-        this.db.create( TAG_COMPANYS, company, (idFb: string) => {
-            return res.status(201).json({
-                status: 'ok',
-                id: idFb
-            });
-        });
+        
     }
 
-    public get = (req: Request, res: Response) => {
-        this.db.get(TAG_COMPANYS, (dataFb:Companys) => {
+    public get =  async (req: Request, res: Response): Promise<any> => {
+        const dataDb  = await this.db.get(TAG_COMPANYS);
+        if(dataDb){
             return res.status(200).json({
-                status: 'ok',
-                data: dataFb
-            }); 
-        });
+                errorCode: 200,
+                data: dataDb
+            } as ResponseDTO); 
+        }
     }
 
 

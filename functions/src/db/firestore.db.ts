@@ -15,9 +15,9 @@ export class FirestoreDB {
         return this.instance;
     }
 
-    public async create<T>(name:string,data:T,callback:Function): Promise<void> {
+    public async create<T>(name:string,data:T): Promise<string> {
         const created = await db.collection(name).add(data);
-        callback(created.id);
+        return created.id;
     }
 
     public async update<T>(name: string, data: T, id:string , callback:Function): Promise<void> {
@@ -32,7 +32,7 @@ export class FirestoreDB {
         callback(id);
     }
 
-    public async get(name: string, callback: Function): Promise<void> {
+    public async get(name: string): Promise<any> {
         const got = await db.collection(name).get();
         const data = await got.docs.map((doc: QueryDocumentSnapshot) => {
             let dataFb = doc.data();
@@ -41,6 +41,6 @@ export class FirestoreDB {
                 ...dataFb
             }
         });
-        callback(data);
+        return data;
     }
 }
